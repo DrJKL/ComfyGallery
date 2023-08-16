@@ -8,7 +8,7 @@ import os
 import re
 import shutil
 import sys
-import urllib
+import urllib.parse
 from datetime import datetime
 from PIL import Image, PngImagePlugin
 
