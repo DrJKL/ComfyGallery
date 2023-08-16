@@ -20,7 +20,7 @@ import webbrowser
 
 
 # SERVERs
-DOMAIN = '127.0.0.1'
+DOMAIN = "127.0.0.1"
 PORT = 8189
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,12 +30,9 @@ PURGE_CACHE = False
 
 # GENERAL GLOBALS
 ALLOWED_EXTENSIONS = [".png", ".jpg", ".jpeg", ".gif", ".webp"]
-CP_FILE = 'web'+os.sep+'extensions'+os.sep+'core'+os.sep+'colorPalette.js'
+CP_FILE = "web" + os.sep + "extensions" + os.sep + "core" + os.sep + "colorPalette.js"
 DB_CACHED = False
-IMAGE_PATHS = [
-    "output",
-    "input"
-]
+IMAGE_PATHS = ["output", "input"]
 THUMBNAIL_DIRECTORY = os.path.join(ROOT, "temp")
 TITLE = "ComfyGallery"
 
@@ -43,12 +40,19 @@ TITLE = "ComfyGallery"
 # FUNCTIONS
 class cstr(str):
     class color:
-        END = '\033[0m'
-        BOLD, ITALIC, UNDERLINE, BLINK, BLINK2, SELECTED = ['\033[%dm' % (i,) for i in range(1, 7)]
-        BLACK, RED, GREEN, YELLOW, BLUE, VIOLET, BEIGE, WHITE = ['\033[%dm' % (i,) for i in range(30, 38)]
-        BLACKBG, REDBG, GREENBG, YELLOWBG, BLUEBG, VIOLETBG, BEIGEBG, WHITEBG = ['\033[%dm' % (i,) for i in range(40, 48)]
-        GREY, LIGHTRED, LIGHTGREEN, LIGHTYELLOW, LIGHTBLUE, LIGHTVIOLET, LIGHTBEIGE, LIGHTWHITE = ['\033[%dm' % (i,) for i in range(90, 98)]
-        GREYBG, LIGHTREDBG, LIGHTGREENBG, LIGHTYELLOWBG, LIGHTBLUEBG, LIGHTVIOLETBG, LIGHTBEIGEBG, LIGHTWHITEBG = ['\033[%dm' % (i,) for i in range(100, 108)]
+        END = "\033[0m"
+        BOLD, ITALIC, UNDERLINE, BLINK, BLINK2, SELECTED = ["\033[%dm" % (i,) for i in range(1, 7)]
+        BLACK, RED, GREEN, YELLOW, BLUE, VIOLET, BEIGE, WHITE = ["\033[%dm" % (i,) for i in range(30, 38)]
+        BLACKBG, REDBG, GREENBG, YELLOWBG, BLUEBG, VIOLETBG, BEIGEBG, WHITEBG = [
+            "\033[%dm" % (i,) for i in range(40, 48)
+        ]
+        GREY, LIGHTRED, LIGHTGREEN, LIGHTYELLOW, LIGHTBLUE, LIGHTVIOLET, LIGHTBEIGE, LIGHTWHITE = [
+            "\033[%dm" % (i,) for i in range(90, 98)
+        ]
+        GREYBG, LIGHTREDBG, LIGHTGREENBG, LIGHTYELLOWBG, LIGHTBLUEBG, LIGHTVIOLETBG, LIGHTBEIGEBG, LIGHTWHITEBG = [
+            "\033[%dm" % (i,) for i in range(100, 108)
+        ]
+
         @staticmethod
         def add_code(name, code):
             if not hasattr(cstr.color, name.upper()):
@@ -75,15 +79,25 @@ class cstr(str):
 
     def print(self, **kwargs):
         print(self, **kwargs)
-        
+
+
 #! MESSAGE TEMPLATES
 cstr.color.add_code("msg", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END}: ")
-cstr.color.add_code("access", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} ({cstr.color.LIGHTYELLOW}Access-Log{cstr.color.END}): ")
-cstr.color.add_code("warning", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} {cstr.color.LIGHTYELLOW}Warning: {cstr.color.END}")
-cstr.color.add_code("error", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} {cstr.color.RED}Error: {cstr.color.END}")
+cstr.color.add_code(
+    "access",
+    f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} ({cstr.color.LIGHTYELLOW}Access-Log{cstr.color.END}): ",
+)
+cstr.color.add_code(
+    "warning", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} {cstr.color.LIGHTYELLOW}Warning: {cstr.color.END}"
+)
+cstr.color.add_code(
+    "error", f"{cstr.color.LIGHTVIOLET}ComfyGallery{cstr.color.END} {cstr.color.RED}Error: {cstr.color.END}"
+)
+
 
 def window_title(title):
     ctypes.windll.kernel32.SetConsoleTitleW(title)
+
 
 def get_full_path(category, path):
     full_path = None
@@ -92,44 +106,52 @@ def get_full_path(category, path):
             base_folder = base_path
             full_path = os.path.join(base_folder, path)
             break
-    
+
     if not full_path:
-        cstr(f"Unable to determine image path from category {cstr.color.LIGHTYELLOW}{category}{cstr.color.END} and path {cstr.color.BOLD}{path}{cstr.color.END}").error.print()
+        cstr(
+            f"Unable to determine image path from category {cstr.color.LIGHTYELLOW}{category}{cstr.color.END} and path {cstr.color.BOLD}{path}{cstr.color.END}"
+        ).error.print()
         return None
-        
+
     if not os.path.exists(full_path):
         cstr(f"Unable to find image at requested path: {cstr.color.BOLD}{full_path}{cstr.color.END}").error.print()
         return None
-        
+
     return full_path
-    
+
+
 def filter_arguments(allowed_args):
     filtered_args = [arg for arg in sys.argv if arg in allowed_args]
     sys.argv = [sys.argv[0]] + filtered_args
 
+
 def get_color_palettes(path):
     if os.path.exists(path):
-        with open(path, 'r') as file:
+        with open(path, "r") as file:
             theme_code = file.read()
     else:
-        with open(os.path.join(ROOT, 'cg_default_themes.json'), 'r') as file:
+        with open(os.path.join(ROOT, "cg_default_themes.json"), "r") as file:
             theme_code = file.read()
             color_palettes = json.loads(theme_code)
-            cstr(f"Unable to locate ComfyUI color palette file at {cstr.color.BOLD}{path}{cstr.color.END}, defaulting to built-in light/dark themes.").warning.print()
+            cstr(
+                f"Unable to locate ComfyUI color palette file at {cstr.color.BOLD}{path}{cstr.color.END}, defaulting to built-in light/dark themes."
+            ).warning.print()
             return color_palettes
-    match = re.search(r'const colorPalettes = ({.*?});', theme_code, re.DOTALL)
+    match = re.search(r"const colorPalettes = ({.*?});", theme_code, re.DOTALL)
     if match:
         color_palettes = match.group(1)
-        color_palettes = re.sub(r'\s\/\/\s.*$', '', color_palettes, flags=re.MULTILINE)
-        color_palettes = re.sub(r',(\s*?})', r'\1', color_palettes)
-        color_palettes = json.loads(color_palettes)          
+        color_palettes = re.sub(r"\s\/\/\s.*$", "", color_palettes, flags=re.MULTILINE)
+        color_palettes = re.sub(r",(\s*?})", r"\1", color_palettes)
+        color_palettes = json.loads(color_palettes)
         return color_palettes
     return {}
-    
+
+
 def split_paths(arg):
-    paths = arg.split(',')
+    paths = arg.split(",")
     paths = [path.strip() for path in paths]
     return paths
+
 
 def create_cors_middleware(allowed_origin: str):
     @web.middleware
@@ -140,25 +162,23 @@ def create_cors_middleware(allowed_origin: str):
         else:
             response = await handler(request)
 
-        response.headers['Access-Control-Allow-Origin'] = allowed_origin
-        response.headers['Access-Control-Allow-Methods'] = 'POST, GET, DELETE, PUT, OPTIONS'
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        response.headers["Access-Control-Allow-Origin"] = allowed_origin
+        response.headers["Access-Control-Allow-Methods"] = "POST, GET, DELETE, PUT, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Credentials"] = "true"
         return response
 
     return cors_middleware
 
+
 def get_paths(category, path):
-    result = {
-        "directories": [],
-        "images": []
-    }
+    result = {"directories": [], "images": []}
 
     for image_path in IMAGE_PATHS:
         if os.path.basename(image_path) == category:
             base_folder = image_path
-            path = path if not path.startswith('/') else ''
-            path = path.replace('/', os.path.sep)
+            path = path if not path.startswith("/") else ""
+            path = path.replace("/", os.path.sep)
             target_folder = os.path.join(base_folder, path)
             combined_path = os.path.abspath(target_folder)
 
@@ -173,7 +193,7 @@ def get_paths(category, path):
                             relative_path = os.path.relpath(item_path, base_folder).replace("\\", "/")
                             result["directories"].append(relative_path)
                         else:
-                            if os.path.splitext(item)[1] in ['.png', '.webp', '.jpg', '.jpeg', '.gif']:
+                            if os.path.splitext(item)[1] in [".png", ".webp", ".jpg", ".jpeg", ".gif"]:
                                 image_relative_path = os.path.join(path, item).replace("\\", "/")
                                 result["images"].append(image_relative_path)
                 else:
@@ -183,28 +203,31 @@ def get_paths(category, path):
                             relative_path = os.path.relpath(item_path, base_folder).replace("\\", "/")
                             result["directories"].append(relative_path)
                         else:
-                            if os.path.splitext(item)[1] in ['.png', '.webp', '.jpg', '.jpeg', '.gif']:
+                            if os.path.splitext(item)[1] in [".png", ".webp", ".jpg", ".jpeg", ".gif"]:
                                 image_relative_path = os.path.join(path, item).replace("\\", "/")
                                 result["images"].append(image_relative_path)
             except Exception as e:
-                cstr(f"There was an error with a path request for category `{category}` and path `{path}`").error.print()
+                cstr(
+                    f"There was an error with a path request for category `{category}` and path `{path}`"
+                ).error.print()
                 print(e)
 
             break
-        
-        if result['directories']:
-            result['directories'] = sorted(result['directories'])
-        if result['images']:
-            result['images'] = sorted(result['images'])
+
+        if result["directories"]:
+            result["directories"] = sorted(result["directories"])
+        if result["images"]:
+            result["images"] = sorted(result["images"])
 
     return json.dumps(result)
+
 
 def compress_image(category, path):
     full_path = get_full_path(category, path)
     if full_path:
         with open(full_path, "rb") as image_file:
             image_data = image_file.read()
-        
+
         thumbnail_filename = os.path.basename(full_path)
         thumbnail_extension = os.path.splitext(thumbnail_filename)[1]
         hash_object = hashlib.sha256(image_data)
@@ -218,7 +241,6 @@ def compress_image(category, path):
                 return thumbnail_file.read()
 
         try:
-        
             image = Image.open(full_path)
 
             if image.mode != "RGB":
@@ -238,14 +260,18 @@ def compress_image(category, path):
                 thumbnail_file.write(compressed_bytes)
 
             return compressed_bytes
-            
+
         except OSError as e:
-            cstr(f"The image from category {cstr.color.LIGHTYELLOW}{category}{cstr.color.END} at {cstr.color.BOLD}{path}{cstr.color.END} may be corrupted.").error.print()
+            cstr(
+                f"The image from category {cstr.color.LIGHTYELLOW}{category}{cstr.color.END} at {cstr.color.BOLD}{path}{cstr.color.END} may be corrupted."
+            ).error.print()
             print(f"Error Message: {e}")
-        
-    return b''
+
+    return b""
+
 
 # ROUTE FUNCTIONS
+
 
 # GET DIRECTORY PATHS
 async def get_directory(request):
@@ -260,8 +286,9 @@ async def get_directory(request):
 
     json_result = get_paths(category, path)
     return web.json_response(json_result)
-  
-# GET IMAGE THUMBNAIL  
+
+
+# GET IMAGE THUMBNAIL
 async def get_image(request):
     category = request.query.get("category")
     path = request.query.get("path")
@@ -269,14 +296,15 @@ async def get_image(request):
     path = urllib.parse.unquote(path) if path else None
     compressed_bytes = compress_image(category, path)
     response = web.StreamResponse()
-    response.content_type = 'image/jpeg'
+    response.content_type = "image/jpeg"
     response.content_length = len(compressed_bytes)
     await response.prepare(request)
     await response.write(compressed_bytes)
     await response.write_eof()
 
     return response
-    
+
+
 # SEARCH IMAGES
 async def search_images(request):
     def search_image_paths(search_query):
@@ -288,12 +316,16 @@ async def search_images(request):
                     for file in files:
                         file_path = os.path.join(root, file)
                         if is_valid_image(file_path):
-                            matched_objects = search_query_in_filename(file, search_query) or search_query_in_workflow(file_path, search_query)
+                            matched_objects = search_query_in_filename(file, search_query) or search_query_in_workflow(
+                                file_path, search_query
+                            )
                             if matched_objects:
                                 result = {
                                     "category": os.path.basename(path),
                                     "path": os.path.relpath(file_path, path),
-                                    "matched": matched_objects[1][1] if len(matched_objects) > 1 and len(matched_objects[1]) > 1 else matched_objects,
+                                    "matched": matched_objects[1][1]
+                                    if len(matched_objects) > 1 and len(matched_objects[1]) > 1
+                                    else matched_objects,
                                 }
                                 results["images"].append(result)
 
@@ -346,16 +378,19 @@ async def search_images(request):
 
     query = request.query.get("query")
     query = urllib.parse.unquote(query) if query else None
-    
+
     result = {"images": []}
-    
+
     if query:
         result = search_image_paths(query)
 
-    return web.Response(text=json.dumps(result), content_type='application/json')
-    
+    return web.Response(text=json.dumps(result), content_type="application/json")
+
+
 # DELETE IMAGE
 last_image = ()
+
+
 async def delete_image(request):
     global last_image
     category = request.query.get("category")
@@ -365,24 +400,27 @@ async def delete_image(request):
 
     if last_image:
         if last_image == (category, path):
-            return web.Response(text=json.dumps({"success":True}), content_type='application/json')
-            
+            return web.Response(text=json.dumps({"success": True}), content_type="application/json")
+
     last_image = (category, path)
     full_path = get_full_path(category, path)
 
     try:
         os.remove(full_path)
         cstr(f"Successfully deleted file: {full_path}").msg.print()
-        return web.Response(text=json.dumps({"success":True}), content_type='application/json')
+        return web.Response(text=json.dumps({"success": True}), content_type="application/json")
     except FileNotFoundError:
         pass
     except Exception as e:
         cstr(f"An error occurred while deleting file: {full_path}").error.print()
         print(e)
-    return web.Response(text=json.dumps({"success":False}), content_type='application/json')
-    
+    return web.Response(text=json.dumps({"success": False}), content_type="application/json")
+
+
 # GET WORKFLOWS
 last_image = None
+
+
 async def get_workflow(request):
     global last_image
     category = request.query.get("category")
@@ -390,43 +428,46 @@ async def get_workflow(request):
     category = urllib.parse.unquote(category) if category else None
     path = urllib.parse.unquote(path) if path else None
     full_path = get_full_path(category, path)
-    
+
     image = Image.open(full_path)
-    
+
     workflow = {}
-    
-    if hasattr(image, 'text'):
-        if 'workflow' in image.text:
-            workflow = json.loads(image.text['workflow'])
 
-    return web.Response(text=json.dumps(workflow, indent=4), content_type='text/plain')
+    if hasattr(image, "text"):
+        if "workflow" in image.text:
+            workflow = json.loads(image.text["workflow"])
 
-        
-    
+    return web.Response(text=json.dumps(workflow, indent=4), content_type="text/plain")
+
+
 # GET FAV ICON SVG
 async def get_fav_icon(request):
-    svg = '''<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" xmlns:v="https://vecta.io/nano"><path fill="#C1344E" d="M816.5 139.5c.762 1.762 2.096 2.762 4 3 125.583 111.584 181.75 251.584 168.5 420-21.063 159.595-99.897 281.095-236.5 364.5-102.486 57.637-211.82 76.64-328 57C286.266 955.677 179.1 882.51 103 764.5c-29.733-48.125-50.567-99.792-62.5-155-27.685-151.595 6.481-287.262 102.5-407C248.583 82.322 381.75 25.489 542.5 32c102.956 7.351 194.29 43.185 274 107.5zm71 331c7.284 56.848.117 111.848-21.5 165-19.757 51.712-49.09 97.046-88 136-64.708 66.104-143.208 105.271-235.5 117.5-50.532 4.638-99.532-2.028-147-20-33.858-12.091-65.191-28.591-94-49.5-.473-1.406-1.473-2.073-3-2 0-.667-.333-1-1-1a608.67 608.67 0 0 1-67.5-70c-42.768-57.276-68.102-121.609-76-193-2.956-46.221 4.044-90.887 21-134 15.195-41.082 36.528-78.415 64-112 32.099-38.788 69.599-70.955 112.5-96.5 35.984-19.662 73.984-33.995 114-43 56.31-10.79 111.31-6.123 165 14 50.397 17.513 95.064 44.18 134 80 27.031 25.32 50.864 53.154 71.5 83.5 23.534 39.115 40.7 80.782 51.5 125z" opacity=".996"/><path fill="#000001" d="M887.5 470.5c-10.8-44.218-27.966-85.885-51.5-125-20.636-30.346-44.469-58.18-71.5-83.5-38.936-35.82-83.603-62.487-134-80-53.69-20.123-108.69-24.79-165-14-40.016 9.005-78.016 23.338-114 43-42.901 25.545-80.401 57.712-112.5 96.5-27.472 33.585-48.805 70.918-64 112-16.956 43.113-23.956 87.779-21 134 7.898 71.391 33.232 135.724 76 193a608.67 608.67 0 0 0 67.5 70c-41.104-29.937-75.937-65.937-104.5-108-79.92-130.022-80.586-260.356-2-391 35.965-52.966 80.799-96.799 134.5-131.5 134.728-75.885 266.394-70.885 395 15 49.702 36.358 90.202 80.858 121.5 133.5 23.469 42.573 38.636 87.907 45.5 136z" opacity=".432"/><path d="M816.5 139.5c1.904.238 3.238 1.238 4 3-1.904-.238-3.238-1.238-4-3z" opacity=".004"/><path fill="#000001" d="M820.5 142.5c96.391 73.675 157.224 170.342 182.5 290 24.59 129.49 2.92 250.49-65 363-76.025 116.49-182.525 188.99-319.5 217.5-140.775 24.96-269.442-3.37-386-85-106.222-80.207-170.222-186.374-192-318.5 11.933 55.208 32.767 106.875 62.5 155C179.1 882.51 286.266 955.677 424.5 984c116.18 19.64 225.514.637 328-57C889.103 843.595 967.937 722.095 989 562.5c13.25-168.416-42.917-308.416-168.5-420z" opacity=".426"/><path fill="#C1344E" d="M682.5 281.5c.473 1.406 1.473 2.073 3 2 .667 0 1 .333 1 1 30.306 26.132 56.473 55.799 78.5 89 44.091 70.989 52.424 145.989 25 225-14.961 37.283-35.961 70.616-63 100-32.169 36.189-70.002 64.689-113.5 85.5-82.407 34.114-161.74 28.114-238-18-53.495-35.159-96.328-80.326-128.5-135.5-10.459-20.228-18.625-41.228-24.5-63-15.198-77.186.302-147.52 46.5-211 29.415-39.42 64.582-72.586 105.5-99.5 91.333-54 182.667-54 274 0 11.93 7.453 23.264 15.62 34 24.5z" opacity=".998"/><path d="M682.5 281.5c1.527-.073 2.527.594 3 2-1.527.073-2.527-.594-3-2z" opacity=".004"/><path fill="#000001" d="M686.5 284.5c43.046 31.208 78.213 69.542 105.5 115 39.782 74.119 45.448 150.786 17 230-14.726 35.146-34.726 66.813-60 95-24.558 27.247-52.058 50.747-82.5 70.5-76.32 45.405-156.32 53.072-240 23-35.146-14.726-66.813-34.726-95-60-30.748-27.721-56.581-59.221-77.5-94.5-16.814-29.941-27.314-61.941-31.5-96 5.875 21.772 14.041 42.772 24.5 63 32.172 55.174 75.005 100.341 128.5 135.5 76.26 46.114 155.593 52.114 238 18 43.498-20.811 81.331-49.311 113.5-85.5 27.039-29.384 48.039-62.717 63-100 27.424-79.011 19.091-154.011-25-225-22.027-33.201-48.194-62.868-78.5-89z" opacity=".419"/><path d="M298.5 817.5c1.527-.073 2.527.594 3 2-1.527.073-2.527-.594-3-2z" opacity=".004"/></svg>'''
-    
+    svg = """<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" shape-rendering="geometricPrecision" image-rendering="optimizeQuality" fill-rule="evenodd" xmlns:v="https://vecta.io/nano"><path fill="#C1344E" d="M816.5 139.5c.762 1.762 2.096 2.762 4 3 125.583 111.584 181.75 251.584 168.5 420-21.063 159.595-99.897 281.095-236.5 364.5-102.486 57.637-211.82 76.64-328 57C286.266 955.677 179.1 882.51 103 764.5c-29.733-48.125-50.567-99.792-62.5-155-27.685-151.595 6.481-287.262 102.5-407C248.583 82.322 381.75 25.489 542.5 32c102.956 7.351 194.29 43.185 274 107.5zm71 331c7.284 56.848.117 111.848-21.5 165-19.757 51.712-49.09 97.046-88 136-64.708 66.104-143.208 105.271-235.5 117.5-50.532 4.638-99.532-2.028-147-20-33.858-12.091-65.191-28.591-94-49.5-.473-1.406-1.473-2.073-3-2 0-.667-.333-1-1-1a608.67 608.67 0 0 1-67.5-70c-42.768-57.276-68.102-121.609-76-193-2.956-46.221 4.044-90.887 21-134 15.195-41.082 36.528-78.415 64-112 32.099-38.788 69.599-70.955 112.5-96.5 35.984-19.662 73.984-33.995 114-43 56.31-10.79 111.31-6.123 165 14 50.397 17.513 95.064 44.18 134 80 27.031 25.32 50.864 53.154 71.5 83.5 23.534 39.115 40.7 80.782 51.5 125z" opacity=".996"/><path fill="#000001" d="M887.5 470.5c-10.8-44.218-27.966-85.885-51.5-125-20.636-30.346-44.469-58.18-71.5-83.5-38.936-35.82-83.603-62.487-134-80-53.69-20.123-108.69-24.79-165-14-40.016 9.005-78.016 23.338-114 43-42.901 25.545-80.401 57.712-112.5 96.5-27.472 33.585-48.805 70.918-64 112-16.956 43.113-23.956 87.779-21 134 7.898 71.391 33.232 135.724 76 193a608.67 608.67 0 0 0 67.5 70c-41.104-29.937-75.937-65.937-104.5-108-79.92-130.022-80.586-260.356-2-391 35.965-52.966 80.799-96.799 134.5-131.5 134.728-75.885 266.394-70.885 395 15 49.702 36.358 90.202 80.858 121.5 133.5 23.469 42.573 38.636 87.907 45.5 136z" opacity=".432"/><path d="M816.5 139.5c1.904.238 3.238 1.238 4 3-1.904-.238-3.238-1.238-4-3z" opacity=".004"/><path fill="#000001" d="M820.5 142.5c96.391 73.675 157.224 170.342 182.5 290 24.59 129.49 2.92 250.49-65 363-76.025 116.49-182.525 188.99-319.5 217.5-140.775 24.96-269.442-3.37-386-85-106.222-80.207-170.222-186.374-192-318.5 11.933 55.208 32.767 106.875 62.5 155C179.1 882.51 286.266 955.677 424.5 984c116.18 19.64 225.514.637 328-57C889.103 843.595 967.937 722.095 989 562.5c13.25-168.416-42.917-308.416-168.5-420z" opacity=".426"/><path fill="#C1344E" d="M682.5 281.5c.473 1.406 1.473 2.073 3 2 .667 0 1 .333 1 1 30.306 26.132 56.473 55.799 78.5 89 44.091 70.989 52.424 145.989 25 225-14.961 37.283-35.961 70.616-63 100-32.169 36.189-70.002 64.689-113.5 85.5-82.407 34.114-161.74 28.114-238-18-53.495-35.159-96.328-80.326-128.5-135.5-10.459-20.228-18.625-41.228-24.5-63-15.198-77.186.302-147.52 46.5-211 29.415-39.42 64.582-72.586 105.5-99.5 91.333-54 182.667-54 274 0 11.93 7.453 23.264 15.62 34 24.5z" opacity=".998"/><path d="M682.5 281.5c1.527-.073 2.527.594 3 2-1.527.073-2.527-.594-3-2z" opacity=".004"/><path fill="#000001" d="M686.5 284.5c43.046 31.208 78.213 69.542 105.5 115 39.782 74.119 45.448 150.786 17 230-14.726 35.146-34.726 66.813-60 95-24.558 27.247-52.058 50.747-82.5 70.5-76.32 45.405-156.32 53.072-240 23-35.146-14.726-66.813-34.726-95-60-30.748-27.721-56.581-59.221-77.5-94.5-16.814-29.941-27.314-61.941-31.5-96 5.875 21.772 14.041 42.772 24.5 63 32.172 55.174 75.005 100.341 128.5 135.5 76.26 46.114 155.593 52.114 238 18 43.498-20.811 81.331-49.311 113.5-85.5 27.039-29.384 48.039-62.717 63-100 27.424-79.011 19.091-154.011-25-225-22.027-33.201-48.194-62.868-78.5-89z" opacity=".419"/><path d="M298.5 817.5c1.527-.073 2.527.594 3 2-1.527.073-2.527-.594-3-2z" opacity=".004"/></svg>"""
+
     return web.Response(text=svg, content_type="image/svg+xml")
-    
+
+
 async def index(request):
-    return web.Response(text=HTML, content_type='text/html')
-    
+    return web.Response(text=HTML, content_type="text/html")
+
 
 if __name__ == "__main__":
-
     # Startup
     window_title(TITLE)
     cstr("Starting ComfyUI Gallery ...").msg.print()
-       
+
     # CLI Arguments
-        
-    parser = argparse.ArgumentParser(prog='comfyui_explorer.py')
-    parser.add_argument("--no-browser", action="store_true", help="Do not launch system browser when the server launches.")
+
+    parser = argparse.ArgumentParser(prog="comfyui_explorer.py")
+    parser.add_argument(
+        "--no-browser", action="store_true", help="Do not launch system browser when the server launches."
+    )
     parser.add_argument("--purge-cache", action="store_true", help="Delete the image gallery cache on startup.")
-    parser.add_argument('--image-paths', type=split_paths)
-    parser.add_argument('--comfyui-path', type=str, default=None, help="Path to ComfyUI root directory.")
-    parser.add_argument('--comfyui-color-palette', type=str, default=None, help="Path to a ComfyUI colorPalette.js file")
+    parser.add_argument("--image-paths", type=split_paths)
+    parser.add_argument("--comfyui-path", type=str, default=None, help="Path to ComfyUI root directory.")
+    parser.add_argument(
+        "--comfyui-color-palette", type=str, default=None, help="Path to a ComfyUI colorPalette.js file"
+    )
     args = parser.parse_args()
 
     if args.no_browser:
@@ -456,66 +497,91 @@ if __name__ == "__main__":
         IMAGE_PATHS = new_image_paths
     if args.comfyui_color_palette:
         CP_FILE = args.comfyui_color_palette
-    
-            
+
     # HANDLE TEMP PATH
     if os.path.exists(THUMBNAIL_DIRECTORY) and PURGE_CACHE:
         shutil.rmtree(THUMBNAIL_DIRECTORY)
     os.makedirs(THUMBNAIL_DIRECTORY, exist_ok=True)
-    
+
     # Setup CSS Colors
     COLORS = get_color_palettes(CP_FILE)
 
     light_css_colors = ""
-    for key, value in COLORS['light']['colors']['node_slot'].items():
+    for key, value in COLORS["light"]["colors"]["node_slot"].items():
         light_css_colors += f"\t\t\t--{key.lower().replace('_','-')}: {value};\n"
-    for key, value in COLORS['light']['colors']['comfy_base'].items():
+    for key, value in COLORS["light"]["colors"]["comfy_base"].items():
         light_css_colors += f"\t\t\t--{key.lower().replace('_','-')}: {value};\n"
     light_css_colors += f"\t\t\t--header-bg: {COLORS['light']['colors']['litegraph_base']['NODE_DEFAULT_BOXCOLOR']};\n"
     light_css_colors += f"\t\t\t--class-menu-bg: {COLORS['light']['colors']['litegraph_base']['WIDGET_BGCOLOR']};\n"
-    light_css_colors += f"\t\t\t--class-info-bg: {COLORS['light']['colors']['litegraph_base']['NODE_DEFAULT_BGCOLOR']};\n"
-    light_css_colors += f"\t\t\t--main-text-color: {COLORS['light']['colors']['litegraph_base']['NODE_SELECTED_TITLE_COLOR']};\n"
+    light_css_colors += (
+        f"\t\t\t--class-info-bg: {COLORS['light']['colors']['litegraph_base']['NODE_DEFAULT_BGCOLOR']};\n"
+    )
+    light_css_colors += (
+        f"\t\t\t--main-text-color: {COLORS['light']['colors']['litegraph_base']['NODE_SELECTED_TITLE_COLOR']};\n"
+    )
     light_css_colors += f"\t\t\t--text-color: {COLORS['light']['colors']['litegraph_base']['NODE_TEXT_COLOR']};\n"
     light_css_colors += f"\t\t\t--alt-text-color: {COLORS['light']['colors']['litegraph_base']['NODE_TITLE_COLOR']};\n"
-    light_css_colors += f"\t\t\t--alt-2-text-color: {COLORS['light']['colors']['litegraph_base']['WIDGET_SECONDARY_TEXT_COLOR']};\n"
-    light_css_colors += f"\t\t\t--shadow-color: {COLORS['light']['colors']['litegraph_base']['DEFAULT_SHADOW_COLOR']};\n"
+    light_css_colors += (
+        f"\t\t\t--alt-2-text-color: {COLORS['light']['colors']['litegraph_base']['WIDGET_SECONDARY_TEXT_COLOR']};\n"
+    )
+    light_css_colors += (
+        f"\t\t\t--shadow-color: {COLORS['light']['colors']['litegraph_base']['DEFAULT_SHADOW_COLOR']};\n"
+    )
     light_css_colors += f"\t\t\t--link-color: {COLORS['light']['colors']['litegraph_base']['LINK_COLOR']};\n"
-    light_css_colors += f"\t\t\t--event-link-color: {COLORS['light']['colors']['litegraph_base']['EVENT_LINK_COLOR']};\n"
-    light_css_colors += f"\t\t\t--connecting-link-color: {COLORS['light']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
-    light_css_colors += f"\t\t\t--connecting-link-color: {COLORS['light']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
-
+    light_css_colors += (
+        f"\t\t\t--event-link-color: {COLORS['light']['colors']['litegraph_base']['EVENT_LINK_COLOR']};\n"
+    )
+    light_css_colors += (
+        f"\t\t\t--connecting-link-color: {COLORS['light']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
+    )
+    light_css_colors += (
+        f"\t\t\t--connecting-link-color: {COLORS['light']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
+    )
 
     dark_css_colors = ""
-    for key, value in COLORS['dark']['colors']['node_slot'].items():
+    for key, value in COLORS["dark"]["colors"]["node_slot"].items():
         dark_css_colors += f"\t\t\t--{key.lower().replace('_','-')}: {value};\n"
-    for key, value in COLORS['dark']['colors']['comfy_base'].items():
+    for key, value in COLORS["dark"]["colors"]["comfy_base"].items():
         dark_css_colors += f"\t\t\t--{key.lower().replace('_','-')}: {value};\n"
     dark_css_colors += f"\t\t\t--header-bg: {COLORS['dark']['colors']['litegraph_base']['NODE_DEFAULT_BOXCOLOR']};\n"
     dark_css_colors += f"\t\t\t--class-menu-bg: {COLORS['dark']['colors']['litegraph_base']['WIDGET_BGCOLOR']};\n"
     dark_css_colors += f"\t\t\t--class-info-bg: {COLORS['dark']['colors']['litegraph_base']['NODE_DEFAULT_BGCOLOR']};\n"
-    dark_css_colors += f"\t\t\t--main-text-color: {COLORS['dark']['colors']['litegraph_base']['NODE_SELECTED_TITLE_COLOR']};\n"
+    dark_css_colors += (
+        f"\t\t\t--main-text-color: {COLORS['dark']['colors']['litegraph_base']['NODE_SELECTED_TITLE_COLOR']};\n"
+    )
     dark_css_colors += f"\t\t\t--text-color: {COLORS['dark']['colors']['litegraph_base']['NODE_TEXT_COLOR']};\n"
     dark_css_colors += f"\t\t\t--alt-text-color: {COLORS['dark']['colors']['litegraph_base']['NODE_TITLE_COLOR']};\n"
-    dark_css_colors += f"\t\t\t--alt-2-text-color: {COLORS['dark']['colors']['litegraph_base']['WIDGET_SECONDARY_TEXT_COLOR']};\n"
+    dark_css_colors += (
+        f"\t\t\t--alt-2-text-color: {COLORS['dark']['colors']['litegraph_base']['WIDGET_SECONDARY_TEXT_COLOR']};\n"
+    )
     dark_css_colors += f"\t\t\t--shadow-color: {COLORS['dark']['colors']['litegraph_base']['DEFAULT_SHADOW_COLOR']};\n"
     dark_css_colors += f"\t\t\t--link-color: {COLORS['dark']['colors']['litegraph_base']['LINK_COLOR']};\n"
     dark_css_colors += f"\t\t\t--event-link-color: {COLORS['dark']['colors']['litegraph_base']['EVENT_LINK_COLOR']};\n"
-    dark_css_colors += f"\t\t\t--connecting-link-color: {COLORS['dark']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
-        
+    dark_css_colors += (
+        f"\t\t\t--connecting-link-color: {COLORS['dark']['colors']['litegraph_base']['CONNECTING_LINK_COLOR']};\n"
+    )
+
     # Define the ComfyUI Dictionary Webpage
-    HTML = '''
+    HTML = (
+        """
     <!DOCTYPE html>
     <html data-theme="light">
     <head>
         <title>ComfyGallery</title>
         <meta charset="UTF-8">
-        <link rel="icon" type="image/svg+xml" href="http://''' + DOMAIN + ''':''' + str(PORT) + '''/favicon.svg">
+        <link rel="icon" type="image/svg+xml" href="http://"""
+        + DOMAIN
+        + """:"""
+        + str(PORT)
+        + """/favicon.svg">
         <style id="theme-styles">
         
             /* GLOBAL COLORS */
         
             [data-theme="dark"] {
-                ''' + dark_css_colors + '''
+                """
+        + dark_css_colors
+        + """
                 --trans-light: rgba(255,255,255,0.5);
                 --trans-dark: rgba(0,0,0,0.5);
                 --svg-invert: invert(100%);
@@ -530,7 +596,9 @@ if __name__ == "__main__":
             }
 
             [data-theme="light"] {
-                ''' + light_css_colors + '''
+                """
+        + light_css_colors
+        + """
                 --trans-light: rgba(255,255,255,0.25);
                 --trans-dark: rgba(0,0,0,0.25);
                 --svg-invert: none;
@@ -1300,7 +1368,11 @@ if __name__ == "__main__":
         </div>
 
         <script>
-            const address = 'http://''' + DOMAIN + ''':''' + str(PORT) + '''',
+            const address = 'http://"""
+        + DOMAIN
+        + """:"""
+        + str(PORT)
+        + """',
                 classListContainer = document.getElementById('class-list-container'),
                 classList = document.getElementById('class-list'),
                 classInfo = document.getElementById('class-info');
@@ -1749,7 +1821,9 @@ if __name__ == "__main__":
                 let hashName = decodeURIComponent(windowHash.replace('#', ''));
 
                 if (hashName == 'home') {
-                    var categories = [''' + ",".join('"' + os.path.basename(path) + '"' for path in IMAGE_PATHS) + '''];
+                    var categories = ["""
+        + ",".join('"' + os.path.basename(path) + '"' for path in IMAGE_PATHS)
+        + """];
                     generateImageGallery(categories);
                     return null;
                 }
@@ -1760,31 +1834,36 @@ if __name__ == "__main__":
             logoLink.addEventListener('click', pageNavigation)
 
             if ( window.location.hash === '' || window.location.hash ==='#home' ) {
-                var categories = [''' + ",".join('"' + os.path.basename(path) + '"' for path in IMAGE_PATHS) + '''];
+                var categories = ["""
+        + ",".join('"' + os.path.basename(path) + '"' for path in IMAGE_PATHS)
+        + """];
                 generateImageGallery(categories);
             }
 
         </script>
     </body>
     </html>
-    '''
+    """
+    )
 
     # HTTP SERVER
 
     cstr(f"Starting Server with Domain: {DOMAIN},  Port:{PORT}").msg.print()
-    middlewares = [create_cors_middleware('*'), ] 
+    middlewares = [
+        create_cors_middleware("*"),
+    ]
     app = web.Application(client_max_size=20971520, middlewares=middlewares)
-    app.router.add_get('/get_image', get_image)
-    app.router.add_get('/search_images', search_images)
-    app.router.add_get('/get_paths', get_directory)
-    app.router.add_get('/get_workflow', get_workflow)
-    app.router.add_get('/delete_image', delete_image)
-    app.router.add_get('/favicon.svg', get_fav_icon)
+    app.router.add_get("/get_image", get_image)
+    app.router.add_get("/search_images", search_images)
+    app.router.add_get("/get_paths", get_directory)
+    app.router.add_get("/get_workflow", get_workflow)
+    app.router.add_get("/delete_image", delete_image)
+    app.router.add_get("/favicon.svg", get_fav_icon)
     for image_res in IMAGE_PATHS:
-        resource = web.StaticResource('/' + os.path.basename(image_res), image_res)
+        resource = web.StaticResource("/" + os.path.basename(image_res), image_res)
         app.router.register_resource(resource)
-    app.router.add_get('/', index)
+    app.router.add_get("/", index)
 
     if not NO_BROWSER:
-        webbrowser.open_new_tab(f'http://{DOMAIN}:{PORT}')
+        webbrowser.open_new_tab(f"http://{DOMAIN}:{PORT}")
     web.run_app(app, host=DOMAIN, port=int(PORT))
